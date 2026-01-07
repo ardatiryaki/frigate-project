@@ -17,10 +17,7 @@ objects:
     - bird
   filters:
     person:
-      min_area: 1500
-      max_area: 100000
-      min_score: 0.7
-      threshold: 0.85
+      threshold: 0.7
 
 cameras:
   tapo_c222:
@@ -46,7 +43,16 @@ cameras:
       width: 640
       height: 360
       fps: 10
+    zones:
+      desk:
+        coordinates: 0.597,0.827,0.889,0.857,0.927,1,0.597,1
+        inertia: 3
+        loitering_time: 0
+      bed:
+        coordinates: 0.283,0.654,0.547,0.705,0.5,1,0.03,1,0.135,0.822
 
+        inertia: 3
+        loitering_time: 0
 database:
   path: /config/frigate.db
 detect:

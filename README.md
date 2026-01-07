@@ -30,3 +30,18 @@ Bu proje, Frigate NVR kullanarak Tapo C222 kamera ile kişi ve nesne algılama s
 ## Notlar
 -   **Gizlilik:** Şifreler `.env` dosyasında saklanmalıdır. Bu dosyayı asla GitHub'a yüklemeyin.
 -   **Performans:** Varsayılan FPS değeri, CPU kullanımını optimize etmek için 10 olarak ayarlanmıştır.
+
+## Değişiklikleri Kaydetme (GitHub)
+
+Projeyi güncelledikten sonra değişiklikleri GitHub'a göndermek için sırasıyla şu komutları kullanın:
+
+```bash
+# 1. Değişiklikleri ekle
+git add .
+
+# 2. Değişiklikleri kaydet (mesajı düzenleyebilirsiniz)
+git commit -m "Yaptığınız değişikliğin açıklaması"
+
+# 3. GitHub'a gönder
+git push
+```
