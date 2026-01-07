@@ -1,0 +1,15 @@
+# .env
+# .env
+.env
+.env.*
+.env.*
+
+# Frigate
+storage/
+frigate.db
+frigate.db-shm
+frigate.db-wal
+debug/
+
+# OS
+.DS_Store

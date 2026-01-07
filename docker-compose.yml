@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    container_name: frigate
+    privileged: true
+    restart: unless-stopped
+    shm_size: '256mb'
+    ports:
+      - "5001:5000"
+      - "8554:8554"
+      - "8555:8555/tcp"
+      - "8555:8555/udp"
+    environment:
+      - FRIGATE_RTSP_PASSWORD=${FRIGATE_RTSP_PASSWORD:-}
+      - FRIGATE_RTSP_USER=${FRIGATE_RTSP_USER}
+      - FRIGATE_RTSP_IP=${FRIGATE_RTSP_IP}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config:/config
+      - ./storage:/media/frigate
+      - type: tmpfs
+        target: /tmp/cache
+        tmpfs:
+          size: 1gb
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    networks:
+      - frigate
+
+networks:
+  frigate:
+    driver: bridge

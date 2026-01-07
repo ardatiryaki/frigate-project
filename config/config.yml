@@ -1,0 +1,54 @@
+logger:
+  default: info
+
+mqtt:
+  enabled: false
+
+detectors:
+  cpu:
+    type: cpu
+
+objects:
+  track:
+    - person
+    - car
+    - dog
+    - cat
+    - bird
+  filters:
+    person:
+      min_area: 1500
+      max_area: 100000
+      min_score: 0.7
+      threshold: 0.85
+
+cameras:
+  tapo_c222:
+    enabled: true
+    ffmpeg:
+      inputs:
+        - path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@{FRIGATE_RTSP_IP}:554/stream1
+          roles:
+            - record
+        - path: rtsp://{FRIGATE_RTSP_USER}:{FRIGATE_RTSP_PASSWORD}@{FRIGATE_RTSP_IP}:554/stream2
+          roles:
+            - detect
+    snapshots:
+      enabled: true
+      clean_copy: true
+    record:
+      enabled: true
+      retain:
+        days: 7
+        mode: motion
+    detect:
+      enabled: true
+      width: 640
+      height: 360
+      fps: 10
+
+database:
+  path: /config/frigate.db
+detect:
+  enabled: true
+version: 0.16-0
