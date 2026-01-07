@@ -9,10 +9,38 @@ CAMERA_NAME = "tapo_c222"
 POLL_INTERVAL = 5  # seconds
 STATS_FILE = "daily_stats.json"
 
+# Hardcoded zones from config for robustness (normalized 0-1)
+ZONES = {
+    'desk': [0.684,0.714,0.894,0.865,0.918,1,0.58,1,0.594,0.846],
+    'bed': [0.283,0.654,0.501,0.681,0.415,1,0.03,1,0.135,0.822]
+}
+
+def is_point_in_polygon(x, y, poly_coords):
+    """
+    Ray casting algorithm to check if point (x,y) is inside polygon.
+    poly_coords: [x1, y1, x2, y2, ...]
+    """
+    # Convert flat list to (x,y) tuples
+    polygon = list(zip(poly_coords[0::2], poly_coords[1::2]))
+    
+    n = len(polygon)
+    inside = False
+    p1x, p1y = polygon[0]
+    for i in range(n + 1):
+        p2x, p2y = polygon[i % n]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x, p1y = p2x, p2y
+    return inside
+
 def get_person_status():
     """
-    Polls Frigate API to check if a person is in 'desk' or 'bed' zone.
-    Returns: 'desk', 'bed', 'away'
+    Polls Frigate API and calculates CURRENT zone based on latest coordinates.
     """
     try:
         # Use events endpoint with in_progress=1 to get current status
@@ -24,7 +52,6 @@ def get_person_status():
             "limit": 5
         }
         
-        # Add timeout to prevent hanging
         response = requests.get(url, params=params, timeout=3)
         
         if response.status_code == 200:
@@ -33,16 +60,26 @@ def get_person_status():
             if not events:
                 return 'away'
             
-            # Check all active events for zones
-            # Priority: Desk > Bed > Room
             for event in events:
-                current_zones = event.get('zones', [])
-                if 'bed' in current_zones:
-                    return 'bed'
-                if 'desk' in current_zones:
-                    return 'desk'
-            
-            # If person detected but not in desk/bed zones
+                # Get the latest known location (foot point)
+                data = event.get('data', {})
+                path_data = data.get('path_data', [])
+                
+                if path_data:
+                    # Last point in path_data is the current location [x, y]
+                    last_point = path_data[-1]
+                    # Format is [[x, y], timestamp]
+                    if len(last_point) >= 1:
+                        coords = last_point[0]
+                        current_x, current_y = coords[0], coords[1]
+                        
+                        # Check Point against Polygons
+                        if is_point_in_polygon(current_x, current_y, ZONES['bed']):
+                            return 'bed'
+                        if is_point_in_polygon(current_x, current_y, ZONES['desk']):
+                            return 'desk'
+
+            # If person detected but geometry check fails (room)
             return 'room' 
                 
     except Exception as e:
